@@ -11,6 +11,7 @@
 #include <boost/asio/any_io_executor.hpp>
 
 #include <itlib/shared_from.hpp>
+#include <itlib/make_ptr.hpp>
 
 #include <variant>
 
@@ -99,28 +100,21 @@ strand_ptr context_executor::make_strand() {
 strand::~strand() = default;
 executor::~executor() = default;
 
-struct work_guard::impl {
+struct work_guard_impl {
     std::variant<
         asio::executor_work_guard<asio::io_context::executor_type>,
         asio::executor_work_guard<asio::any_io_executor>
     > wg;
 };
 
-work_guard::work_guard() = default;
-work_guard::~work_guard() = default;
-work_guard::work_guard(work_guard&&) noexcept = default;
-work_guard& work_guard::operator=(work_guard&&) noexcept = default;
-void work_guard::reset() { m_impl.reset(); }
-work_guard::work_guard(impl* impl) : m_impl(impl) {}
-
 work_guard executor::make_work_guard() {
-    return work_guard(new work_guard::impl{
+    return itlib::make_shared(work_guard_impl{
         boost::asio::make_work_guard(as_asio_executor())
     });
 }
 
 work_guard context::make_work_guard() {
-    return work_guard(new work_guard::impl{
+    return itlib::make_shared(work_guard_impl{
         boost::asio::make_work_guard(as_asio_io_context())
     });
 }

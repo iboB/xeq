@@ -6,24 +6,8 @@
 
 namespace xeq {
 
-class XEQ_API work_guard {
-public:
-    work_guard();
-    ~work_guard();
+struct work_guard_impl; // opaque
 
-    work_guard(work_guard&&) noexcept;
-    work_guard& operator=(work_guard&&) noexcept;
-
-    explicit operator bool() const noexcept { return !!m_impl; }
-
-    void reset();
-private:
-    struct impl;
-    std::unique_ptr<impl> m_impl;
-
-    work_guard(impl* impl);
-    friend class executor;
-    friend class context;
-};
+using work_guard = std::shared_ptr<work_guard_impl>;
 
 } // namespace xeq

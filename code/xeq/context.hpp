@@ -4,6 +4,7 @@
 #pragma once
 #include "api.h"
 #include "executor.hpp"
+#include "work_guard.hpp"
 #include <boost/asio/io_context.hpp>
 
 namespace boost::asio {
@@ -11,8 +12,6 @@ class io_context;
 }
 
 namespace xeq {
-
-class work_guard;
 
 class XEQ_API context : public boost::asio::io_context {
 public:

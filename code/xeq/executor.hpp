@@ -4,6 +4,7 @@
 #pragma once
 #include "api.h"
 #include "ufunc.hpp"
+#include "work_guard.hpp"
 #include <coroutine>
 #include <memory>
 
@@ -12,8 +13,6 @@ class any_io_executor;
 }
 
 namespace xeq {
-
-class work_guard;
 
 class executor;
 class strand;
