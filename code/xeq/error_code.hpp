@@ -1,8 +1,8 @@
 // Copyright (c) Borislav Stanimirov
 // SPDX-License-Identifier: MIT
 //
-#include <boost/system/error_code.hpp>
+#include <system_error>
 
 namespace xeq {
-using error_code = boost::system::error_code;
+using error_code = std::error_code;
 } // namespace xeq

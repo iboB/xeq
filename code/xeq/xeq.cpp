@@ -4,11 +4,13 @@
 #include "executor.hpp"
 #include "context.hpp"
 #include "work_guard.hpp"
+#include "timer.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/any_io_executor.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 #include <itlib/shared_from.hpp>
 #include <itlib/make_ptr.hpp>
@@ -121,6 +123,48 @@ work_guard context::make_work_guard() {
 
 void context::init_executor() {
     m_executor = std::make_shared<context_executor>(asio::io_context::get_executor());
+}
+
+timer::~timer() = default; // export vtable
+
+struct timer_impl final : public timer {
+public:
+    asio::steady_timer m_timer;
+    strand_ptr m_strand;
+
+    explicit timer_impl(strand_ptr strand)
+        : timer(strand)
+        , m_timer(strand->as_asio_executor())
+    {}
+
+    virtual size_t expire_after(duration timeFromNow) override {
+        return m_timer.expires_after(timeFromNow);
+    }
+    virtual size_t expire_at(time_point t) override {
+        return m_timer.expires_at(t);
+    }
+    virtual size_t expire_never() override {
+        return m_timer.expires_at(time_point::max());
+    }
+
+    virtual size_t cancel() override {
+        return m_timer.cancel();
+    }
+    virtual size_t cancel_one() override {
+        return m_timer.cancel_one();
+    }
+
+    virtual time_point expiry() const override {
+        return m_timer.expiry();
+    }
+
+    virtual void add_wait_cb(wait_func cb) override {
+        m_timer.async_wait(std::move(cb));
+    }
+};
+
+timer_ptr timer::create(const executor_ptr& ex) {
+    return std::make_unique<timer_impl>(ex->make_strand());
 }
 
 } // namespace xeq

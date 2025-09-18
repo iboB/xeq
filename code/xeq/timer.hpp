@@ -2,39 +2,65 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include "api.h"
+#include "strand.hpp"
+#include "wait_func.hpp"
 #include "timeout.hpp"
-#include <boost/asio/steady_timer.hpp>
+#include <chrono>
+#include <cstddef>
+#include <memory>
 
 namespace xeq {
-template <typename Executor>
-using boost_steady_etimer = boost::asio::basic_waitable_timer<
-    boost::asio::steady_timer::clock_type,
-    boost::asio::steady_timer::traits_type,
-    Executor
->;
 
-template <typename Executor>
-class etimer : public boost_steady_etimer<Executor> {
+class timer;
+using timer_ptr = std::unique_ptr<timer>;
+
+class XEQ_API timer {
 public:
-    using super = boost_steady_etimer<Executor>;
+    virtual ~timer();
 
-    using executor_type = typename super::executor_type;
-    using clock_type = typename super::clock_type;
+    using clock_type = std::chrono::steady_clock;
+    using duration = clock_type::duration;
+    using time_point = clock_type::time_point;
 
-    using super::basic_waitable_timer;
+    timer(const timer&) = delete;
+    timer& operator=(const timer&) = delete;
 
-    size_t expires_never() {
-        return this->expires_at(clock_type::time_point::max());
-    }
+    virtual size_t expire_after(duration t_from_now) = 0;
+    virtual size_t expire_at(time_point t) = 0;
+    virtual size_t expire_never() = 0;
 
-    size_t expires(timeout to) {
-        if (to.is_infinite()) {
-            return this->expires_never();
+    size_t set_timeout(timeout t) {
+        if (t.is_infinite()) {
+            return expire_never();
         }
-        return this->expires_after(to.duration);
+        return expire_after(t.duration);
     }
-};
 
-using timer = etimer<boost::asio::any_io_executor>;
+    virtual size_t cancel() = 0;
+    virtual size_t cancel_one() = 0;
+
+    virtual time_point expiry() const = 0;
+
+    virtual void add_wait_cb(wait_func cb) = 0;
+
+    // will create a strand from the executor if it's not a strand itself
+    // the timer will be "hit" from potentially multiple threads
+    // if the executor is not a strand itself,
+    // this will cause races when notify_one and timer expiry happen at roughly the same time
+    // thus the timer executor is always a strand
+    static timer_ptr create(const executor_ptr& s);
+
+    const strand_ptr& get_executor() const {
+        return m_strand;
+    }
+private:
+    // sealed interface
+    timer(const strand_ptr& strand)
+        : m_strand(strand)
+    {}
+    strand_ptr m_strand;
+    friend struct timer_impl;
+};
 
 } // namespace xeq
