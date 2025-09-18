@@ -1,3 +1,6 @@
+// Copyright (c) Borislav Stanimirov
+// SPDX-License-Identifier: MIT
+//
 #define PICOBENCH_IMPLEMENT
 #include <picobench/picobench.hpp>
 
