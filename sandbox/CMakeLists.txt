@@ -1,8 +1,8 @@
 # Copyright (c) Borislav Stanimirov
 # SPDX-License-Identifier: MIT
 #
-add_executable(mylib-sandbox
+add_executable(xeq-sandbox
     sandbox.cpp
 )
-target_link_libraries(mylib-sandbox mylib::mylib)
-set_target_properties(mylib-sandbox PROPERTIES FOLDER sandbox)
+target_link_libraries(xeq-sandbox xeq::xeq)
+set_target_properties(xeq-sandbox PROPERTIES FOLDER sandbox)

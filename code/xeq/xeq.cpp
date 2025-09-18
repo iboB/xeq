@@ -1,8 +1,10 @@
 // Copyright (c) Borislav Stanimirov
 // SPDX-License-Identifier: MIT
 //
-#include <iostream>
+#include "api.h"
 
-int main() {
-    std::cout << "hello\n";
+namespace xeq {
+
+XEQ_API void foo() {}
+
 }

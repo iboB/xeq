@@ -3,7 +3,7 @@
 #
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
-project(mylib
+project(xeq
     LANGUAGES C CXX
 )
 
@@ -23,7 +23,7 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
 )
 
-set(ICM_DEV_CXX_STANDARD 23)
+set(ICM_DEV_CXX_STANDARD 20)
 set(ICM_DEV_C_STANDARD 11)
 
 include(icm_dev_mode)
@@ -32,30 +32,30 @@ include(icm_dev_mode)
 # options
 
 option(BUILD_SHARED_LIBS "${PROJECT_NAME}: build shared libraries" ON)
-option(MYLIB_BUILD_TESTS "${PROJECT_NAME}: enable testing and build tests" ${ICM_DEV_MODE})
-option(MYLIB_BUILD_EXAMPLES "${PROJECT_NAME}: build examples" ${ICM_DEV_MODE})
-option(MYLIB_BUILD_TUTORIALS "${PROJECT_NAME}: build tutorials" ${ICM_DEV_MODE})
-option(MYLIB_BUILD_BENCH "${PROJECT_NAME}: build benchmarks" ${ICM_DEV_MODE})
-option(MYLIB_BUILD_SANDBOX "${PROJECT_NAME}: build sandbox project (dev experiments)" ${ICM_DEV_MODE})
-mark_as_advanced(MYLIB_BUILD_SANDBOX)
+option(XEQ_BUILD_TESTS "${PROJECT_NAME}: enable testing and build tests" ${ICM_DEV_MODE})
+option(XEQ_BUILD_EXAMPLES "${PROJECT_NAME}: build examples" ${ICM_DEV_MODE})
+option(XEQ_BUILD_TUTORIALS "${PROJECT_NAME}: build tutorials" ${ICM_DEV_MODE})
+option(XEQ_BUILD_BENCH "${PROJECT_NAME}: build benchmarks" ${ICM_DEV_MODE})
+option(XEQ_BUILD_SANDBOX "${PROJECT_NAME}: build sandbox project (dev experiments)" ${ICM_DEV_MODE})
+mark_as_advanced(XEQ_BUILD_SANDBOX)
 
 #######################################
 # code
 add_subdirectory(code)
 
-if(MYLIB_BUILD_TESTS)
+if(XEQ_BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
 endif()
 
-if(MYLIB_BUILD_BENCH)
+if(XEQ_BUILD_BENCH)
     add_subdirectory(bench)
 endif()
 
-if(MYLIB_BUILD_EXAMPLES)
+if(XEQ_BUILD_EXAMPLES)
     add_subdirectory(example)
 endif()
 
-if(MYLIB_BUILD_SANDBOX)
+if(XEQ_BUILD_SANDBOX)
     add_subdirectory(sandbox)
 endif()
