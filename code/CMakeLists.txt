@@ -33,8 +33,10 @@ target_sources(xeq
         xeq/xeq.cpp
 )
 
-target_link_libraries(xeq PUBLIC
-    splat::splat
-    itlib::itlib
-    Boost::asio
+target_link_libraries(xeq
+    PUBLIC
+        splat::splat
+        itlib::itlib
+    PRIVATE
+        Boost::asio
 )
