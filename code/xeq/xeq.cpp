@@ -22,6 +22,22 @@ using asio_strand = asio::strand<asio::io_context::executor_type>;
 
 namespace xeq {
 
+namespace {
+struct transparent_string_hash : public std::hash<std::string_view> {
+    using hash_type = std::hash<std::string_view>;
+    using hash_type::operator();
+    using is_transparent = void;
+};
+
+template <typename T>
+using tsumap = std::unordered_map<
+    std::string,
+    T,
+    transparent_string_hash,
+    std::equal_to<>
+>;
+}
+
 struct context::impl : public asio::io_context {
     impl() {
         init_executor();
@@ -34,6 +50,7 @@ struct context::impl : public asio::io_context {
 
     void init_executor();
     executor_ptr m_executor;
+    tsumap<std::shared_ptr<void>> m_objects;
 };
 
 namespace {
@@ -173,6 +190,29 @@ strand_ptr context::make_strand() {
 
 boost::asio::io_context& context::as_asio_io_context() noexcept {
     return *m_impl;
+}
+
+void context::attach_object(std::string_view name, std::shared_ptr<void> obj) {
+    // throw if already exists
+    auto [_, inserted] = m_impl->m_objects.emplace(std::string(name), std::move(obj));
+    if (!inserted) {
+        throw std::runtime_error("xeq::context::attach_object: object with name '" + std::string(name) + "' already exists");
+    }
+}
+
+std::shared_ptr<void> context::get_object(std::string_view name) const noexcept {
+    auto it = m_impl->m_objects.find(name);
+    if (it == m_impl->m_objects.end()) return {};
+    return it->second;
+}
+
+std::shared_ptr<void> context::detach_object(std::string_view name) noexcept {
+    auto f = m_impl->m_objects.find(name);
+    if (f == m_impl->m_objects.end()) return {};
+
+    auto ret = f->second;
+    m_impl->m_objects.erase(f);
+    return ret;
 }
 
 timer::~timer() = default; // export vtable
