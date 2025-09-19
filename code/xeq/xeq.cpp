@@ -14,6 +14,7 @@
 
 #include <itlib/shared_from.hpp>
 #include <itlib/make_ptr.hpp>
+#include <itlib/data_mutex.hpp>
 
 #include <variant>
 
@@ -50,7 +51,7 @@ struct context::impl : public asio::io_context {
 
     void init_executor();
     executor_ptr m_executor;
-    tsumap<std::shared_ptr<void>> m_objects;
+    itlib::data_mutex<tsumap<std::shared_ptr<void>>, std::mutex> m_objects;
 };
 
 namespace {
@@ -194,24 +195,26 @@ boost::asio::io_context& context::as_asio_io_context() noexcept {
 
 void context::attach_object(std::string_view name, std::shared_ptr<void> obj) {
     // throw if already exists
-    auto [_, inserted] = m_impl->m_objects.emplace(std::string(name), std::move(obj));
+    auto [_, inserted] = m_impl->m_objects.unique_lock()->emplace(std::string(name), std::move(obj));
     if (!inserted) {
         throw std::runtime_error("xeq::context::attach_object: object with name '" + std::string(name) + "' already exists");
     }
 }
 
 std::shared_ptr<void> context::get_object(std::string_view name) const noexcept {
-    auto it = m_impl->m_objects.find(name);
-    if (it == m_impl->m_objects.end()) return {};
+    auto objects = m_impl->m_objects.unique_lock();
+    auto it = objects->find(name);
+    if (it == objects->end()) return {};
     return it->second;
 }
 
 std::shared_ptr<void> context::detach_object(std::string_view name) noexcept {
-    auto f = m_impl->m_objects.find(name);
-    if (f == m_impl->m_objects.end()) return {};
+    auto objects = m_impl->m_objects.unique_lock();
+    auto f = objects->find(name);
+    if (f == objects->end()) return {};
 
     auto ret = f->second;
-    m_impl->m_objects.erase(f);
+    objects->erase(f);
     return ret;
 }
 
