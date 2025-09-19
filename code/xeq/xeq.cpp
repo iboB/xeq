@@ -22,6 +22,20 @@ using asio_strand = asio::strand<asio::io_context::executor_type>;
 
 namespace xeq {
 
+struct context::impl : public asio::io_context {
+    impl() {
+        init_executor();
+    }
+    impl(int concurrency_hint)
+        : asio::io_context(concurrency_hint)
+    {
+        init_executor();
+    }
+
+    void init_executor();
+    executor_ptr m_executor;
+};
+
 namespace {
 
 class context_executor final : public executor, public itlib::enable_shared_from {
@@ -75,8 +89,8 @@ public:
     }
 
     executor_ptr get_super_executor() noexcept override {
-        auto& ctx = static_cast<context&>(m_astrand.context());
-        return ctx.get_executor();
+        auto& ctx = static_cast<context::impl&>(m_astrand.context());
+        return ctx.m_executor;
     }
 
     boost::asio::any_io_executor as_asio_executor() noexcept override {
@@ -121,8 +135,44 @@ work_guard context::make_work_guard() {
     });
 }
 
-void context::init_executor() {
-    m_executor = std::make_shared<context_executor>(asio::io_context::get_executor());
+void context::impl::init_executor() {
+    m_executor = std::make_shared<context_executor>(get_executor());
+}
+
+context::context() : m_impl(std::make_unique<impl>()) {}
+context::context(int concurrency_hint) : m_impl(std::make_unique<impl>(concurrency_hint)) {}
+context::~context() = default;
+
+size_t context::run() {
+    return m_impl->run();
+}
+
+size_t context::poll() {
+    return m_impl->poll();
+}
+
+void context::stop() {
+    m_impl->stop();
+}
+
+bool context::stopped() const {
+    return m_impl->stopped();
+}
+
+void context::restart() {
+    m_impl->restart();
+}
+
+const executor_ptr& context::get_executor() const noexcept {
+    return m_impl->m_executor;
+}
+
+strand_ptr context::make_strand() {
+    return m_impl->m_executor->make_strand();
+}
+
+boost::asio::io_context& context::as_asio_io_context() noexcept {
+    return *m_impl;
 }
 
 timer::~timer() = default; // export vtable

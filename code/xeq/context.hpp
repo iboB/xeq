@@ -5,7 +5,6 @@
 #include "api.h"
 #include "executor.hpp"
 #include "work_guard.hpp"
-#include <boost/asio/io_context.hpp>
 
 namespace boost::asio {
 class io_context;
@@ -13,33 +12,32 @@ class io_context;
 
 namespace xeq {
 
-class XEQ_API context : public boost::asio::io_context {
+class XEQ_API context {
 public:
-    context() {
-        init_executor();
-    }
-    explicit context(int concurrency_hint)
-        : boost::asio::io_context(concurrency_hint)
-    {
-        init_executor();
-    }
+    context();
+    explicit context(int concurrency_hint);
+    ~context();
+
+    context(const context&) = delete;
+    context& operator=(const context&) = delete;
+
+    size_t run();
+    size_t poll();
+
+    void stop();
+    bool stopped() const;
+    void restart();
 
     work_guard make_work_guard();
 
-    const executor_ptr& get_executor() const noexcept {
-        return m_executor;
-    }
+    const executor_ptr& get_executor() const noexcept;
 
-    strand_ptr make_strand() {
-        return m_executor->make_strand();
-    }
+    strand_ptr make_strand();
 
-    boost::asio::io_context& as_asio_io_context() noexcept {
-        return *this;
-    }
+    boost::asio::io_context& as_asio_io_context() noexcept;
 
+    struct impl;
 private:
-    void init_executor();
-    executor_ptr m_executor;
+    std::unique_ptr<impl> m_impl;
 };
 } // namespace xeq
