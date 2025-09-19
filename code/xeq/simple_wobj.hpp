@@ -5,7 +5,6 @@
 #include "executor.hpp"
 #include "wait_func.hpp"
 #include "wait_func_invoke.hpp"
-#include "executor.hpp"
 #include "coro_wobj.hpp"
 
 namespace xeq {

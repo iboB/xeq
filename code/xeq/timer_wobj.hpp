@@ -5,7 +5,6 @@
 #include "timer.hpp"
 #include "wait_func_concept.hpp"
 #include "executor.hpp"
-#include "strand.hpp"
 #include "coro_wobj.hpp"
 #include <cassert>
 

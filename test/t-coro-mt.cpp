@@ -6,7 +6,7 @@
 #include <xeq/co_spawn.hpp>
 #include <xeq/co_execute.hpp>
 #include <xeq/thread_runner.hpp>
-#include <xeq/strand.hpp>
+#include <xeq/executor.hpp>
 #include <doctest/doctest.h>
 
 class worker {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "executor.hpp"
+#include "executor_ptr.hpp"
 #include <itlib/expected.hpp>
 #include <coroutine>
 #include <stdexcept>

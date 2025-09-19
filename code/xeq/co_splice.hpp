@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
-#include "coro.hpp"
-#include "strand.hpp"
 #include "co_spawn.hpp"
 #include <stdexcept>
 

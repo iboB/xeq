@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 //
 #pragma once
+#include "coro.hpp"
 #include "context.hpp"
+#include "executor.hpp"
 
 namespace xeq {
 

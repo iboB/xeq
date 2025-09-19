@@ -5,6 +5,7 @@
 #include "api.h"
 #include "ufunc.hpp"
 #include "work_guard.hpp"
+#include "executor_ptr.hpp"
 #include <coroutine>
 #include <memory>
 
@@ -13,12 +14,6 @@ class any_io_executor;
 }
 
 namespace xeq {
-
-class executor;
-class strand;
-
-using executor_ptr = std::shared_ptr<executor>;
-using strand_ptr = std::shared_ptr<strand>;
 
 class XEQ_API executor {
 public:
