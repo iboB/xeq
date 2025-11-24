@@ -223,9 +223,8 @@ timer::~timer() = default; // export vtable
 struct timer_impl final : public timer {
 public:
     asio::steady_timer m_timer;
-    strand_ptr m_strand;
 
-    explicit timer_impl(strand_ptr strand)
+    explicit timer_impl(executor_ptr strand)
         : timer(strand)
         , m_timer(strand->as_asio_executor())
     {}
@@ -257,7 +256,7 @@ public:
 };
 
 timer_ptr timer::create(const executor_ptr& ex) {
-    return std::make_unique<timer_impl>(ex->make_strand());
+    return std::make_unique<timer_impl>(ex);
 }
 
 } // namespace xeq

@@ -15,9 +15,15 @@ class timer_wobj {
 public:
     explicit timer_wobj(const executor_ptr& ex)
         : m_timer(timer::create(ex))
-    {}
+    {
+        // the timer will be "hit" from potentially multiple threads
+        // if the executor is not a strand itself,
+        // this will cause races when notify_one and timer expiry happen at roughly the same time
+        // a timer_wobj must be used with a strand
+        assert(ex->is_strand());
+    }
 
-    const strand_ptr& get_executor() noexcept {
+    const executor_ptr& get_executor() noexcept {
         return m_timer->get_executor();
     }
 

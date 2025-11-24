@@ -44,22 +44,17 @@ public:
 
     virtual void add_wait_cb(wait_func cb) = 0;
 
-    // will create a strand from the executor if it's not a strand itself
-    // the timer will be "hit" from potentially multiple threads
-    // if the executor is not a strand itself,
-    // this will cause races when notify_one and timer expiry happen at roughly the same time
-    // thus the timer executor is always a strand
     static timer_ptr create(const executor_ptr& s);
 
-    const strand_ptr& get_executor() const {
-        return m_strand;
+    const executor_ptr& get_executor() const {
+        return m_executor;
     }
 private:
     // sealed interface
-    timer(const strand_ptr& strand)
-        : m_strand(strand)
+    timer(const executor_ptr& strand)
+        : m_executor(strand)
     {}
-    strand_ptr m_strand;
+    executor_ptr m_executor;
     friend struct timer_impl;
 };
 
