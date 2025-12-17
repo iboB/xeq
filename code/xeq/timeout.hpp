@@ -10,13 +10,20 @@ namespace xeq {
 
 template <typename Rep>
 struct t_timeout {
+    static_assert(std::is_signed_v<Rep>, "timeout representation must be signed");
+
     using rep_t = Rep;
-    std::chrono::duration<rep_t, std::milli> duration;
+    using duration_t = std::chrono::duration<rep_t, std::milli>;
+    duration_t duration;
 
     constexpr t_timeout() = default;
-    constexpr t_timeout(std::chrono::milliseconds d) : duration(d) {} // intentionally not explicit
 
-    static constexpr t_timeout after(std::chrono::milliseconds d) { return t_timeout{d}; }
+    template <typename Rep2, typename Period>
+    constexpr t_timeout(std::chrono::duration<Rep2, Period> d) : duration(std::chrono::ceil<duration_t>(d)) {} // intentionally not explicit
+
+    template <typename Rep2, typename Period>
+    static constexpr t_timeout after(std::chrono::duration<Rep2, Period> d) { return t_timeout{d}; }
+
     static constexpr t_timeout after_ms(rep_t ms) { return after(std::chrono::milliseconds(ms)); }
     static constexpr t_timeout never() { return t_timeout{std::chrono::milliseconds(-1)}; }
     static constexpr t_timeout now() { return t_timeout{std::chrono::milliseconds(0)}; }
@@ -24,7 +31,14 @@ struct t_timeout {
 
     constexpr rep_t ms() const { return duration.count(); };
     constexpr bool is_infinite() const { return ms() < 0; }
+    constexpr bool is_finite() const { return ms() >= 0; }
     constexpr bool is_zero() const { return ms() == 0; }
+
+    constexpr bool operator==(const t_timeout&) const = default;
+    constexpr auto operator<=>(const t_timeout& other) const {
+        using URep = std::make_unsigned_t<Rep>;
+        return URep(ms()) <=> URep(other.ms());
+    }
 };
 
 // we don't expect huge timeouts, so no point in wasting bits by default
