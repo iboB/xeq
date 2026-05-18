@@ -25,6 +25,7 @@ public:
     }
 
     void wait(wait_func cb) {
+        assert(m_executor->running_in_this_thread());
         if (m_cb) {
             m_executor->post([old = std::move(m_cb)] {
                 wait_func_invoke_cancelled(old);
