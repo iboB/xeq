@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: MIT
 #
 include(icm_add_lib)
-CPMAddPackage(gh:iboB/splat@1.3.4)
-CPMAddPackage(gh:iboB/itlib@1.11.7)
+CPMAddPackage(gh:iboB/splat@1.3.5)
+CPMAddPackage(gh:iboB/itlib@1.12.2)
 
 if(NOT TARGET Boost::boost)
     CPMAddPackage(
