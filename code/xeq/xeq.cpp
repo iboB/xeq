@@ -95,8 +95,7 @@ public:
     asio_strand m_astrand;
     strand_executor(asio_strand&& s)
         : m_astrand(std::move(s))
-    {
-    }
+    {}
     virtual void post(ufunc<void()> func) override {
         asio::post(m_astrand, std::move(func));
     }
