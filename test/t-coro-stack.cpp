@@ -3,7 +3,7 @@
 #include <xeq/co_spawn.hpp>
 #include <doctest/doctest.h>
 
-// GCC does not implement symmetric transfer with O0 or with address sanitizer
+// GCC does not implement symmetric transfer with O0 or with sanitization
 // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100897
 // https://github.com/iboB/gcc-coro-stack-overflow
 
@@ -13,7 +13,7 @@
 #elif defined(__clang__)
 // enable with clang
 #define ENABLE 1
-#elif defined(__SANITIZE_ADDRESS__)
+#elif defined(__SANITIZE_ADDRESS__) || defined(__SANITIZE_THREAD__)
 // disable with gcc and address sanitizer
 #define ENABLE 0
 #elif defined(__OPTIMIZE__) && __OPTIMIZE__ > 0
