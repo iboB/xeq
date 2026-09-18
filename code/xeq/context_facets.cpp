@@ -1,7 +1,6 @@
 // Copyright (c) Borislav Stanimirov
 // SPDX-License-Identifier: MIT
 //
-#pragma once
 #include "context_facet_domain.hpp"
 #include <trex/facets/define.hpp>
 
