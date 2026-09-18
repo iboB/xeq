@@ -13,6 +13,8 @@ class io_context;
 
 namespace xeq {
 
+class context_facets;
+
 class XEQ_API context {
 public:
     context();
@@ -37,9 +39,7 @@ public:
 
     boost::asio::io_context& as_asio_io_context() noexcept;
 
-    void attach_object(std::string_view name, std::shared_ptr<void> obj);
-    [[nodiscard]] std::shared_ptr<void> get_object(std::string_view name) const noexcept;
-    std::shared_ptr<void> detach_object(std::string_view name) noexcept;
+    context_facets& facets() noexcept;
 
     struct impl;
 private:

@@ -4,6 +4,7 @@
 include(icm_add_lib)
 CPMAddPackage(gh:iboB/splat@1.3.5)
 CPMAddPackage(gh:iboB/itlib@1.12.2)
+CPMAddPackage(gh:iboB/trex@0.2.0)
 
 if(NOT TARGET Boost::boost)
     CPMAddPackage(
@@ -31,12 +32,14 @@ target_sources(xeq
     PRIVATE
         xeq/thread_name.cpp
         xeq/xeq.cpp
+        xeq/context_facets.cpp
 )
 
 target_link_libraries(xeq
     PUBLIC
         splat::splat
         itlib::itlib
+        trex::trex
     PRIVATE
         Boost::asio
 )

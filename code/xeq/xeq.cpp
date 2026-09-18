@@ -5,6 +5,7 @@
 #include "executor.hpp"
 #include "work_guard.hpp"
 #include "timer.hpp"
+#include "context_facets.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/strand.hpp>
@@ -14,7 +15,6 @@
 
 #include <itlib/shared_from.hpp>
 #include <itlib/make_ptr.hpp>
-#include <itlib/data_mutex.hpp>
 
 #include <variant>
 
@@ -51,7 +51,7 @@ struct context::impl : public asio::io_context {
 
     void init_executor();
     executor_ptr m_executor;
-    itlib::data_mutex<tsumap<std::shared_ptr<void>>, std::mutex> m_objects;
+    context_facets m_facets;
 };
 
 namespace {
@@ -192,29 +192,8 @@ boost::asio::io_context& context::as_asio_io_context() noexcept {
     return *m_impl;
 }
 
-void context::attach_object(std::string_view name, std::shared_ptr<void> obj) {
-    // throw if already exists
-    auto [_, inserted] = m_impl->m_objects.unique_lock()->emplace(std::string(name), std::move(obj));
-    if (!inserted) {
-        throw std::runtime_error("xeq::context::attach_object: object with name '" + std::string(name) + "' already exists");
-    }
-}
-
-std::shared_ptr<void> context::get_object(std::string_view name) const noexcept {
-    auto objects = m_impl->m_objects.unique_lock();
-    auto it = objects->find(name);
-    if (it == objects->end()) return {};
-    return it->second;
-}
-
-std::shared_ptr<void> context::detach_object(std::string_view name) noexcept {
-    auto objects = m_impl->m_objects.unique_lock();
-    auto f = objects->find(name);
-    if (f == objects->end()) return {};
-
-    auto ret = f->second;
-    objects->erase(f);
-    return ret;
+context_facets& context::facets() noexcept {
+    return m_impl->m_facets;
 }
 
 timer::~timer() = default; // export vtable
